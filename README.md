@@ -2,6 +2,7 @@
 =============
 
 示例:
+
     var Form = require('sexy-form');
     var form = new Form();
 
