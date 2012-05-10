@@ -2,7 +2,7 @@
 =============
 
 示例:
-
+    var Form = require('sexy-form');
     var form = new Form();
 
 添加自定义过滤规则
