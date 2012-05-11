@@ -737,6 +737,7 @@
 	     */
 	    this.onSubmit = function(values){
 	    	return _isPass;
+	    	
 	    };
 
 	    this.on = function(event , callback){
