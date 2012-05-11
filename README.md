@@ -1,6 +1,91 @@
 友好的表单验证
 =============
 
+
+用户跟服务端交互,往往是通过表单. 而客户端提交的数据是不可信的. 于是,这样的代码出现了:
+
+
+    if(undefined !== req.body.data.name && 0 != req.body.data.name.length  ){
+        var name = util.escapeHTML(req.body.data.name);
+        name = tuil.trim(name);
+    }else{
+        return res.json({success : false , msg : '名称不能为空' });
+    }
+
+    if(util.isNumeric(req.body.data.sex)){
+        var sex = Number(req.body.data.sex);
+    }else{
+        return res.json({success : false , msg : '性别数据异常' });
+    }
+
+    if(util.isEmail(req.body.data.email)){
+        //....
+    }else{
+        return res.json({success : false , msg : '邮箱格式错误' });
+    }
+    //....
+
+
+是不是很不sexy , 于是 , sexy-form 来了:
+
+    var Form = require('sexy-form');
+    var form = new Form();
+
+    form.add('text',{
+        name : 'name' ,
+        label : '姓名' ,
+        validators : ['isString' , 'notEmpty'] ,
+        filters : ['trim' , 'escapeHTML' , 'toUpperCase']
+    }).add('select' , {
+        name : 'sex' ,
+        label : '性别' ,
+        data : [
+            { value : 1 , label : '男' } ,
+            { value : 2 , label : '女' } ,
+            { value : 3 , label : '保密' }
+        ]
+    }).add('text' , {
+        name : 'email' ,
+        label : '邮箱' ,
+        validators : ['isEmail'] ,
+        filters : ['trim']
+    });
+    
+    //验证失败的处理, 注意,如果有多个表单元素验证失败,会执行多次
+    form.on('validateError',function(e , msg){
+        return res.json({success : false , msg : e.label + msg });
+    });
+
+    form.setValues(req.body.data).validate(function(value){
+        //验证通过,返回经过过滤的值
+        console.log(value);
+    });
+
+
+sexy多了吧,而且,表单的定义还可以传给view.
+客户端只需要扩展下 sexy-form , 加上构造表单dom的能力,客户端的实时验证也实现了(后续功能)
+    
+    res.render('admin/index' , {form : form.getConfig() });
+
+
+项目地址: [https://github.com/vfasky/node-sexy-form](https://github.com/vfasky/node-sexy-form)
+
+默认支持的验证规则:
+
+ - isEmail
+ - isNumber
+ - isUrl
+ - notEmpty
+
+默认支持的滤规则
+
+ - trim
+ - toLowerCase
+ - toUpperCase
+ - escapeHTML
+ - toNumber
+
+
 示例:
 
     var Form = require('sexy-form');
